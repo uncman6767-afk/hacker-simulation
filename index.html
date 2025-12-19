@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hacker Interface MAX</title>
+<style>
+body{
+  background:black;
+  color:#00ff00;
+  font-family:monospace;
+  margin:0;
+  overflow:hidden;
+}
+#term{
+  padding:15px;
+  height:100vh;
+  overflow-y:auto;
+  white-space:pre-wrap;
+}
+.red{color:red}
+.yellow{color:yellow}
+.blue{color:cyan}
+.bar{
+  width:100%;
+  border:1px solid #0f0;
+  background:#020;
+  margin:5px 0;
+}
+.fill{
+  height:12px;
+  width:0%;
+  background:#0f0;
+}
+</style>
+</head>
+<body onclick="focusTerm()">
+
+<div id="term"></div>
+
+<audio id="key" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+
+<script>
+const term=document.getElementById("term");
+const key=document.getElementById("key");
+
+function type(text,cls=""){
+ let d=document.createElement("div");
+ d.className=cls;
+ term.appendChild(d);
+ let i=0;
+ let int=setInterval(()=>{
+  d.textContent+=text[i];
+  key.currentTime=0; key.play();
+  i++;
+  if(i>=text.length) clearInterval(int);
+  term.scrollTop=99999;
+ },8);
+}
+
+function bar(label){
+ let t=document.createElement("div");
+ t.textContent=label;
+ let b=document.createElement("div");
+ b.className="bar";
+ let f=document.createElement("div");
+ f.className="fill";
+ b.appendChild(f);
+ term.appendChild(t);
+ term.appendChild(b);
+ let p=0;
+ let i=setInterval(()=>{
+  p+=Math.random()*12;
+  f.style.width=p+"%";
+  if(p>=100) clearInterval(i);
+ },80);
+}
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function ip(){return `${rand(1,255)}.${rand(0,255)}.${rand(0,255)}.${rand(1,255)}`}
+const countries=["USA","GER","RUS","JPN","BRA","UK","CAN","FRA","AUS"];
+
+function spam(){
+ return setInterval(()=>{
+  type(`[DATA] ${ip()} | ${countries[rand(0,countries.length-1)]} | ${Math.random().toString(36).substring(2,10)}`);
+ },120);
+}
+
+let loop;
+
+function start(){
+ term.innerHTML="";
+ type("INITIALIZING HACKER INTERFACE v10.0","blue");
+ setTimeout(()=>type("Loading kernel modules..."),300);
+ setTimeout(()=>bar("Bypassing firewall"),700);
+ setTimeout(()=>type("AI SECURITY DETECTED","red"),1200);
+ setTimeout(()=>bar("Injecting spoof packets"),1500);
+ setTimeout(()=>type("Tracing target IP: "+ip()),2000);
+ setTimeout(()=>type("Location identified: "+countries[rand(0,countries.length-1)]),2400);
+ setTimeout(()=>bar("Decrypting data stream"),2800);
+ setTimeout(()=>type("ROOT ACCESS GRANTED ✔","yellow"),3600);
+ setTimeout(()=>type("Downloading classified data..."),3900);
+ setTimeout(()=>loop=spam(),4200);
+}
+
+document.addEventListener("keydown",e=>{
+ if(e.key==="Enter"){
+  clearInterval(loop);
+  start();
+ }
+});
+
+function focusTerm(){window.focus()}
+
+type("HACKER INTERFACE MAX MODE","blue");
+type("Press ENTER to initiate sequence","yellow");
+</script>
+
+</body>
+</html>
