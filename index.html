@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Hacker Simulator v2</title>
+<title>Hacker Code Simulator</title>
 <style>
 body {
   background:black;
@@ -11,13 +11,14 @@ body {
   margin:0;
 }
 #term {
-  padding:15px;
-  height:95vh;
+  padding:10px;
+  height:70vh;
   overflow-y:auto;
 }
-input {
+#editor {
   width:100%;
-  background:black;
+  height:25vh;
+  background:#050505;
   color:#00ff00;
   border:none;
   outline:none;
@@ -31,27 +32,21 @@ input {
 <body>
 
 <div id="term"></div>
-<input id="cmd" autofocus>
+<textarea id="editor" placeholder="// write your script here"></textarea>
 
 <script>
 const term = document.getElementById("term");
-const cmd = document.getElementById("cmd");
+const editor = document.getElementById("editor");
 
-let level = 1, xp = 0, money = 0;
-let connected = null;
-let firewallDown = false;
+let level = 1;
+let money = 0;
+let target = null;
 
 const systems = {
- "104.22.9.12":{name:"City Bank",sec:2,reward:500},
- "23.18.44.7":{name:"Police Net",sec:4,reward:1200},
- "77.91.203.88":{name:"Tech MegaCorp",sec:5,reward:2000}
+ "bank_server":{sec:2,reward:500},
+ "police_db":{sec:4,reward:1200},
+ "corp_vault":{sec:5,reward:2000}
 };
-
-const missions = [
- "Steal bank credentials",
- "Extract police records",
- "Hack corporate vault"
-];
 
 function print(t,c=""){
  let d=document.createElement("div");
@@ -61,93 +56,40 @@ function print(t,c=""){
  term.scrollTop=term.scrollHeight;
 }
 
-print("=== HACKER OS v2.3 ===","blue");
-print("Type <b>help</b> to start");
+print("=== HACKER CODE OS ===","blue");
+print("Write code, then press CTRL + ENTER to run");
+print("Targets: bank_server, police_db, corp_vault","yellow");
 
-cmd.addEventListener("keydown",e=>{
- if(e.key==="Enter"){
-  let v=cmd.value.trim();
-  cmd.value="";
-  print("> "+v);
-  run(v);
+editor.focus();
+
+editor.addEventListener("keydown",e=>{
+ if(e.key==="Enter" && e.ctrlKey){
+  runCode(editor.value);
  }
 });
 
-function run(v){
- let a=v.split(" ");
- switch(a[0]){
-  case "help":
-   print("scan | connect [ip] | crack | decrypt | steal");
-   print("missions | stats | upgrade | clear");
-   break;
-
-  case "scan":
-   print("Network scan running...");
-   for(let ip in systems)
-    print(ip+" - "+systems[ip].name);
-   break;
-
-  case "connect":
-   if(systems[a[1]]){
-    connected=systems[a[1]];
-    firewallDown=false;
-    print("Connected to "+connected.name,"yellow");
-   } else print("Host unreachable","red");
-   break;
-
-  case "crack":
-   if(!connected) return print("No target","red");
-   if(level>=connected.sec){
-    firewallDown=true;
-    print("Firewall cracked ✔");
-   } else print("Firewall too strong","red");
-   break;
-
-  case "decrypt":
-   if(!firewallDown) return print("Access denied","red");
-   print("Decrypting files...");
-   break;
-
-  case "steal":
-   if(!firewallDown) return print("Security active","red");
-   money+=connected.reward;
-   xp+=connected.sec*50;
-   print("Data stolen: $"+connected.reward,"yellow");
-   connected=null;
-   checkLevel();
-   break;
-
-  case "missions":
-   missions.forEach((m,i)=>print((i+1)+". "+m));
-   break;
-
-  case "stats":
-   print("Level: "+level);
-   print("XP: "+xp);
-   print("Money: $"+money);
-   break;
-
-  case "upgrade":
-   if(money>=1000){
-    money-=1000;
-    level++;
-    print("Software upgraded. Level "+level,"yellow");
-   } else print("Not enough money","red");
-   break;
-
-  case "clear":
-   term.innerHTML="";
-   break;
-
-  default:
-   print("Unknown command","red");
+function runCode(code){
+ print("<br>Running script...");
+ if(code.includes("target =")){
+  let t = code.split("target =")[1].split(";")[0].trim();
+  target = systems[t];
+  if(!target) return print("Invalid target","red");
  }
-}
 
-function checkLevel(){
- if(xp>=level*100){
-  level++;
-  print("LEVEL UP → "+level,"blue");
+ if(code.includes("function hack()")){
+  if(level < target.sec){
+    print("ERROR: Security level too high","red");
+    return;
+  }
+  if(code.includes("bypassFirewall()") && code.includes("decryptFiles()")){
+    money += target.reward;
+    print("SUCCESS: Data extracted","yellow");
+    print("Earned $"+target.reward);
+  } else {
+    print("Script incomplete","red");
+  }
+ } else {
+  print("No hack() function found","red");
  }
 }
 </script>
