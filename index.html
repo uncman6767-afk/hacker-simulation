@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hacker OS Ultimate</title>
+<style>
+:root{
+ --bg:black; --fg:#00ff00; --dim:#020;
+}
+body{
+ margin:0; background:var(--bg); color:var(--fg);
+ font-family:monospace; overflow:hidden;
+}
+#term{padding:15px;height:100vh;overflow-y:auto;white-space:pre-wrap}
+.red{color:#ff4444}.yellow{color:#ffff66}.blue{color:#66ccff}
+.bar{width:100%;border:1px solid var(--fg);background:var(--dim);margin:6px 0}
+.fill{height:12px;width:0%;background:var(--fg)}
+.center{display:flex;align-items:center;justify-content:center;height:100vh}
+.box{border:1px solid var(--fg);padding:20px}
+input{
+ background:transparent;color:var(--fg);border:1px solid var(--fg);
+ font-family:monospace;padding:5px;margin:5px 0;width:200px
+}
+</style>
+</head>
+<body>
+
+<div id="screen"></div>
+
+<script>
+const screen=document.getElementById("screen");
+let paused=false, spamLoop=null, stage="login";
+
+function clear(){screen.innerHTML=""}
+function scroll(){screen.scrollTop=99999}
+
+function typeLine(text,cls=""){
+ if(paused) return;
+ const d=document.createElement("div"); d.className=cls; screen.appendChild(d);
+ let i=0; const it=setInterval(()=>{
+  d.textContent+=text[i++]||""; scroll();
+  if(i>=text.length) clearInterval(it);
+ },6);
+}
+
+function bar(label){
+ if(paused) return;
+ const t=document.createElement("div"); t.textContent=label;
+ const b=document.createElement("div"); b.className="bar";
+ const f=document.createElement("div"); f.className="fill";
+ b.appendChild(f); screen.appendChild(t); screen.appendChild(b);
+ let p=0; const it=setInterval(()=>{
+  if(paused) return;
+  p+=Math.random()*12; f.style.width=p+"%";
+  if(p>=100) clearInterval(it);
+ },80);
+}
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function ip(){return `${rand(1,255)}.${rand(0,255)}.${rand(0,255)}.${rand(1,255)}`}
+const countries=["USA","CAN","UK","GER","JPN","AUS","BRA","FRA"];
+
+function spam(){
+ spamLoop=setInterval(()=>{
+  if(!paused)
+   typeLine(`[DATA] ${ip()} | ${countries[rand(0,countries.length-1)]} | ${Math.random().toString(36).slice(2,10)}`);
+ },120);
+}
+
+/* THEMES */
+function theme(n){
+ if(n===1){document.documentElement.style.cssText="--bg:black;--fg:#00ff00;--dim:#020"}
+ if(n===2){document.documentElement.style.cssText="--bg:black;--fg:#ff4444;--dim:#200"}
+ if(n===3){document.documentElement.style.cssText="--bg:black;--fg:#66ccff;--dim:#012"}
+}
+
+/* LOGIN */
+function login(){
+ clear();
+ const c=document.createElement("div"); c.className="center";
+ const b=document.createElement("div"); b.className="box";
+ b.innerHTML="<b>SECURE TERMINAL LOGIN</b><br>"+
+ "<input id='u' placeholder='username'><br>"+
+ "<input id='p' type='password' placeholder='password'><br>"+
+ "<div>Press ENTER</div>";
+ c.appendChild(b); screen.appendChild(c);
+ document.getElementById("u").focus();
+ stage="login";
+}
+
+/* BOOT */
+function boot(){
+ clear(); stage="boot";
+ typeLine("Booting HackerOS v12.4","blue");
+ setTimeout(()=>typeLine("Initializing virtual hardware..."),300);
+ setTimeout(()=>typeLine("Loading kernel modules..."),700);
+ setTimeout(()=>bar("Mounting encrypted volumes"),1100);
+ setTimeout(()=>typeLine("System integrity OK","yellow"),1800);
+ setTimeout(()=>terminal(),2300);
+}
+
+/* TERMINAL */
+function terminal(){
+ clear(); stage="term";
+ typeLine("HACKER INTERFACE — SIMULATION MODE","blue");
+ typeLine("AI Firewall: ACTIVE","yellow");
+ setTimeout(()=>bar("Bypassing firewall"),500);
+ setTimeout(()=>typeLine("Tracing target IP: "+ip()),1100);
+ setTimeout(()=>typeLine("Location: "+countries[rand(0,countries.length-1)]),1500);
+ setTimeout(()=>bar("Decrypting data stream"),1900);
+ setTimeout(()=>typeLine("ROOT ACCESS (SIMULATED) ✔","yellow"),2600);
+ setTimeout(()=>spam(),3000);
+}
+
+/* INPUT HANDLING */
+document.addEventListener("keydown",e=>{
+ if(e.key==="Enter"){
+  if(stage==="login") boot();
+  else terminal();
+ }
+ if(e.key==="Escape"){clear(); typeLine("EMERGENCY CLEAR","red")}
+ if(e.key.toLowerCase()==="p"){
+  paused=!paused; typeLine(paused?"[PAUSED]":"[RESUMED]","blue");
+ }
+ if(["1","2","3"].includes(e.key)) theme(+e.key);
+ if(e.key.length===1 && stage==="term")
+  typeLine(`[KEY] ${e.key} -> buffer updated`);
+});
+
+document.addEventListener("mousemove",()=>{
+ if(stage==="term" && Math.random()<0.02)
+  typeLine("Mouse activity detected","yellow");
+});
+
+/* START */
+login();
+</script>
+
+</body>
+</html>
