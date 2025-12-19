@@ -1,0 +1,75 @@
+let score = 0;
+
+const terminal = document.getElementById("terminal");
+const statusText = document.getElementById("status");
+const scoreText = document.getElementById("scoreValue");
+
+// Fake hacking steps
+const hackSteps = [
+    "Initializing hacking module...",
+    "Connecting to remote server...",
+    "Scanning open ports...",
+    "Bypassing firewall...",
+    "Injecting exploit...",
+    "Decrypting data packets...",
+    "Finalizing access..."
+];
+
+// Typewriter effect
+function typeText(text, speed = 25, callback) {
+    let i = 0;
+    const interval = setInterval(() => {
+        terminal.innerHTML += text.charAt(i);
+        i++;
+        terminal.scrollTop = terminal.scrollHeight;
+
+        if (i >= text.length) {
+            clearInterval(interval);
+            terminal.innerHTML += "<br>";
+            if (callback) callback();
+        }
+    }, speed);
+}
+
+// Start hacking
+function startHack() {
+    terminal.innerHTML = "";
+    statusText.innerText = "Hacking in progress...";
+    let step = 0;
+
+    function nextStep() {
+        if (step < hackSteps.length) {
+            typeText(hackSteps[step], 20, () => {
+                step++;
+                setTimeout(nextStep, 400);
+            });
+        } else {
+            finishHack();
+        }
+    }
+
+    nextStep();
+}
+
+// End result
+function finishHack() {
+    const success = Math.random() > 0.35;
+
+    setTimeout(() => {
+        if (success) {
+            typeText("ACCESS GRANTED ✔", 30);
+            score += 100;
+        } else {
+            typeText("ACCESS DENIED ✖", 30);
+        }
+
+        scoreText.innerText = score;
+        statusText.innerText = "";
+    }, 500);
+}
+
+// Clear terminal
+function resetTerminal() {
+    terminal.innerHTML = "";
+    statusText.innerText = "";
+}
